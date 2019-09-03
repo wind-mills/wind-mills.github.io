@@ -23,17 +23,6 @@
       </tags>
   </entry>
   <entry>
-    <title><![CDATA[Head插件安装]]></title>
-    <url>%2F2019%2F08%2F30%2Fes%2FHead(%E7%B1%BB%E4%BC%BC%E4%BA%8Emysql%E7%9A%84Navicat)%2F</url>
-    <content type="text"><![CDATA[1.安装环境Node.js 10.15.32.安装步骤：2.1.Node.js环境安装head插件要求Node.js环境，并且Node.js的版本 大于等于 6.0。首先，在官网下载Node.js。这里，我直接下载最新版 Node.js 10.15.3。下载地址：https://nodejs.org/en/download/。选择Linux Binaries (x64)，点击下载、解压。解压完成后，然后配置一下环境变量。下面给出我的配置：12export NODE_HOME=/home/tom/data/node-v10.15.3-linux-x64export PATH=$NODE_HOME/bin:$PATH配置好后，执行命令 source /etc/profile 使上面的配置生效。然后执行 npm -v，看到输出 6.4.1。则咱们的Node.js环境安装成功。2.2.head插件安装首先，在GitHub上找到head插件，地址：https://github.com/mobz/elasticsearch-head。将其下载/克隆到本地。下载完成后，进入 elasticsearch-head的目录下，按顺序执行命令：1234# 安装插件；由于需要下载一些数据，所以可能会比较慢。npm install# 启动插件；如果需要后台启动，可以使用 nohup，具体用法请自行百度npm run start按道理，执行上面的命令后，head 插件应该成功安装，并且正常启动。启动后，我们可以通过 localhost:9100 进行访问。但是，我在安装过程中，碰到了以下问题，下面记录下来，并和大家分享，希望能帮到大家。2.3.问题解决2.3.1.问题一1npm ERR! Error: EACCES: permission denied, access &apos;/home/tom/data/elasticsearch-head-master/node_modules&apos;显而易见，这是目录访问权限问题。我的解决办法是：切换到 root 用户，再执行 npm install 进行安装。2.3.2.问题二12Error extracting archivetar (child): bzip2：无法 exec: 没有那个文件或目录这个问题是因为系统中缺少 bzip2 包，直接执行下面命令安装即可：1yum install -y bzip22.3.3.问题三1npm ERR! phantomjs-prebuilt@2.1.16 install: `node install.js`这个我在github的一个issue下找到了答案，执行命令：1npm install phantomjs-prebuilt@2.1.16 --ignore-scripts这样，我们就安装好了 phantomjs-prebuilt@2.1.16，再执行 npm install 即可。到这里时，head插件安装的问题全部都解决了，启动head插件：12npm run startlocalhost:91002.3.4.问题四无法连接esES和head插件实际上属于两个不同的进程，这里存在一个跨域问题。要解决这个问题，需要首先关闭Elasticsearch，在elasticsearch.yml文件后添加两行配置：12http.cors.enabled: truehttp.cors.allow-origin: &quot;*&quot;然后，重新启动ES，刷新 head 插件页面，即可看到现在head插件已经正确查找到了我们的启动那个ES节点至此，我们的Elasticsearch-head插件就安装成功了。]]></content>
-      <categories>
-        <category>elasticsearch</category>
-      </categories>
-      <tags>
-        <tag>elasticsearch插件</tag>
-      </tags>
-  </entry>
-  <entry>
     <title><![CDATA[elasticsearch7.0新特性]]></title>
     <url>%2F2019%2F08%2F30%2Fes%2Felasticsearch7.0%E6%96%B0%E7%89%B9%E6%80%A7%2F</url>
     <content type="text"><![CDATA[更新Elasticsearch 7.0 默认自带 JDK，不再担心JDK和环境冲突默认分片数改为1，不再是5==ES数据存储结构变化：去除了Typees6时，官方就提到了es7会删除type，并且es6时已经规定每一个index只能有一个type。在es7中使用默认的_doc作为type，官方说在8.x版本会彻底移除type====api请求方式也发送变化，如获得某索引的某ID的文档：GET index/_doc/id其中index和id为具体的值==链接扩展：http://note.youdao.com/noteshare?id=96373b8a5580905e69124ed035a241f3&amp;sub=0D5323D7E5DA426AA7E0360482C1AFE7集群连接变化：TransportClient被废弃以至于，es7的java代码，只能使用restclient。然后，个人综合了一下，对于java编程，建议采用 High-level-rest-client 的方式操作ES集群1.革命性更新1.1.查询相关性速度优化Weak-AND算法在Term Query查询场景有3700%的性能提升。[http://www.aboutyun.com/thread-27003-1-1.html]除了Term检索，Fuzzy，Phrase, Bool And .Bool OR都有大幅的性能提升！123456weak-and算法？核心原理：取TOP N结果集，估算命中记录数。简单来说，一般我们在计算文本相关性的时候，会通过倒排索引的方式进行查询，通过倒排索引已经要比全量遍历节约大量时间，但是有时候仍然很慢。原因是很多时候我们其实只是想要top n个结果，一些结果明显较差的也进行了复杂的相关性计算，而weak-and算法通过计算每个词的贡献上限来估计文档的相关性上限，从而建立一个阈值对倒排中的结果进行减枝，从而得到提速的效果。更快的前 k 个查询：在许多搜索用例中，快速查看查询的前 k 个结果对于用户而言比确切的命中数更重要。例如，如果有人在电子商务网站上搜索产品，他们对 10 个最相关的结果更感兴趣，而不是与搜索查询匹配的其他 120 897 个结果。Elasticsearch 7.0 和 Lucene 8.0 实现了一种新算法 Block-Max WAND，可在巨幅提升检索命中前 k 个结果的速度。1.2.间隔查询(Intervals queries)某些搜索用例（例如，法律和专利搜索）引入了查找单词或短语彼此相距一定距离的记录的需要。Elasticsearch 7.0中的间隔查询引入了一种构建此类查询的全新方式，与之前的方法（跨度查询span queries）相比，使用和定义更加简单。与跨度查询相比，间隔查询对边缘情况的适应性更强。1.3.引入新的集群协调子系统移除 minimum_master_nodes 参数，让 Elasticsearch 自己选择可以形成仲裁的节点。典型的主节点选举现在只需要很短的时间就可以完成。集群的伸缩变得更安全、更容易，并且可能造成丢失数据的系统配置选项更少了。节点更清楚地记录它们的状态，有助于诊断为什么它们不能加入集群或为什么无法选举出主节点。1.4.不再内存溢出升级到 Elasticsearch 7.0 ,新的 Circuit Breaker 在JVM 堆栈层面监测内存使用，Elasticsearch 比之前更加健壮。设置indices.breaker.fielddata.limit的默认值已从JVM堆大小的60％降低到40％。1.5.时间戳纳秒级支持，提升数据精度利用纳秒精度支持加强时间序列用例到目前为止，Elasticsearch仅以毫秒精度存储时间戳。 7.0增加了几个零并带来了纳秒精度，这提高了高频数据采集用户存储和排序所需数据的精度。1.6.其他Function score 2.0：自定义评分是高级搜索用例的基础，人们希望更好地控制相关性和结果排名，Elasticsearch 从早期就提供了这样的能力。7.0 引入了下一代 function score，提供了一种更简单、模块化与灵活的方式来生成每条记录的排名分数。新的模块化结构允许用户混合和匹配一组算术和距离函数，以构建任意函数分值计算，更好地控制结果的分值和排名。此外，Elasticsearch 7.0 中还引入了一个新的聚合来处理地理地图图块，允许用户在地图上放大和缩小，而不会改变结果数据的形状，实现更加平滑地缩放 Elastic Maps；使用纳秒精度存储时序数据的时间戳，允许具有高频数据采集需求的用户可以更加精确地存储和排序他们的数据。显然，7.0的特性远不止这些，更多新版本特性推荐阅读：http://t.cn/EXyStrWhttp://t.cn/EXyStrOhttps://www.elastic.co/guide/en/elasticsearch/reference/current/breaking-changes-7.0.html#_literal_network_breaker_inflight_requests_overhead_literal_increased_to_2]]></content>
@@ -42,6 +31,17 @@
       </categories>
       <tags>
         <tag>elasticsearch</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[Head插件安装]]></title>
+    <url>%2F2019%2F08%2F30%2Fes%2FHead(%E7%B1%BB%E4%BC%BC%E4%BA%8Emysql%E7%9A%84Navicat)%2F</url>
+    <content type="text"><![CDATA[1.安装环境Node.js 10.15.32.安装步骤：2.1.Node.js环境安装head插件要求Node.js环境，并且Node.js的版本 大于等于 6.0。首先，在官网下载Node.js。这里，我直接下载最新版 Node.js 10.15.3。下载地址：https://nodejs.org/en/download/。选择Linux Binaries (x64)，点击下载、解压。解压完成后，然后配置一下环境变量。下面给出我的配置：12export NODE_HOME=/home/tom/data/node-v10.15.3-linux-x64export PATH=$NODE_HOME/bin:$PATH配置好后，执行命令 source /etc/profile 使上面的配置生效。然后执行 npm -v，看到输出 6.4.1。则咱们的Node.js环境安装成功。2.2.head插件安装首先，在GitHub上找到head插件，地址：https://github.com/mobz/elasticsearch-head。将其下载/克隆到本地。下载完成后，进入 elasticsearch-head的目录下，按顺序执行命令：1234# 安装插件；由于需要下载一些数据，所以可能会比较慢。npm install# 启动插件；如果需要后台启动，可以使用 nohup，具体用法请自行百度npm run start按道理，执行上面的命令后，head 插件应该成功安装，并且正常启动。启动后，我们可以通过 localhost:9100 进行访问。但是，我在安装过程中，碰到了以下问题，下面记录下来，并和大家分享，希望能帮到大家。2.3.问题解决2.3.1.问题一1npm ERR! Error: EACCES: permission denied, access &apos;/home/tom/data/elasticsearch-head-master/node_modules&apos;显而易见，这是目录访问权限问题。我的解决办法是：切换到 root 用户，再执行 npm install 进行安装。2.3.2.问题二12Error extracting archivetar (child): bzip2：无法 exec: 没有那个文件或目录这个问题是因为系统中缺少 bzip2 包，直接执行下面命令安装即可：1yum install -y bzip22.3.3.问题三1npm ERR! phantomjs-prebuilt@2.1.16 install: `node install.js`这个我在github的一个issue下找到了答案，执行命令：1npm install phantomjs-prebuilt@2.1.16 --ignore-scripts这样，我们就安装好了 phantomjs-prebuilt@2.1.16，再执行 npm install 即可。到这里时，head插件安装的问题全部都解决了，启动head插件：12npm run startlocalhost:91002.3.4.问题四无法连接esES和head插件实际上属于两个不同的进程，这里存在一个跨域问题。要解决这个问题，需要首先关闭Elasticsearch，在elasticsearch.yml文件后添加两行配置：12http.cors.enabled: truehttp.cors.allow-origin: &quot;*&quot;然后，重新启动ES，刷新 head 插件页面，即可看到现在head插件已经正确查找到了我们的启动那个ES节点至此，我们的Elasticsearch-head插件就安装成功了。]]></content>
+      <categories>
+        <category>elasticsearch</category>
+      </categories>
+      <tags>
+        <tag>elasticsearch插件</tag>
       </tags>
   </entry>
   <entry>
