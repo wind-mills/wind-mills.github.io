@@ -1,20 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
-    <title><![CDATA[搭建cerebro监控]]></title>
-    <url>%2F2019%2F08%2F30%2Fes%2FCentos7%20%E6%90%AD%E5%BB%BACerebro%20Elasticsearch%E7%9B%91%E6%8E%A7%2F</url>
-    <content type="text"><![CDATA[Cerebro Elasticsearch简介cerebro是一个开源(MIT许可)elasticsearch web管理工具，使用Scala、Play Framework、AngularJS和Bootstrap构建。cerebro的运行需要java1.8及以上版本。（对比head插件，比head页面美观，也方便使用）项目Github主页 ： https://github.com/lmenezes/cerebro安装12wget https://github.com/lmenezes/cerebro/releases/download/v0.8.1/cerebro-0.8.1.tgztar -zxvf cerebro-0.8.1.tgz配置：1234567891011121314151617181920es = &#123; gzip = true&#125;# Authenticationauth = &#123;type: basic settings: &#123; username = &quot;wind&quot; password = &quot;xxxxx&quot; &#125;&#125;# A list of known hostshosts = [ &#123; host = &quot;http://localhost:9200&quot; name = &quot;WIND-ES&quot; &#125;]启动 ：./bin/cerebro1&gt; 访问,9000端口:http://xxx.xxx:9000/12默认端口为9000，若需要修改端口tee -a /etc/systemd/system/cerebro.service &lt;&lt; ‘EOF’http = {port = “9000”address = “192.168.1.144”}EOF```port暴露的端口address默认为0.0.0.0，设置为0.0.0.0表示对该主机所有网卡开放]]></content>
+    <title><![CDATA[“OUT_OF_SERVICE”了解EUREKA的下线/上线]]></title>
+    <url>%2F2019%2F09%2F05%2Fspringcloud%2FEUREKA%20%E4%B8%8B%E7%BA%BF%E4%B8%8A%E7%BA%BF%2F</url>
+    <content type="text"><![CDATA[EUREKA 下线上线启动项目发现服务请求不到，打开eureka注册中心发线实例被标注了OUT_OF_SERVICE开发环境中，eureka注册中心某服务被注册了多个实例，feign 调用时 服务请求到其他实例上，请求收不到，使用一下命令删除或者强制下线实例：1.DELETE 删除注册实例，但是如果被删除的实例继续注册，还是会存在命令：1http://192.168.x.xx:8761/eureka/apps/xxx/192.168.y.yy192.168.x.xx:8761 为 eurek的地址，xxx 为服务的名称，192.168.y.yy 为需要删除注册的实例别名例如该服务，想要删除 192.168.y.yy 命令为1http://192.168.x.xx:8761/eureka/apps/xxx/192.168.y.yy使用POSTMAN调用delete请求即可1DELETE http://192.168.x.xx:8761/eureka/apps/xxx/192.168.y.yy2.强制下线实例 out_of_service命令：1http://192.168.x.xx:8761/eureka/apps/ORDER/192.168.y.yy/status?value=OUT_OF_SERVICE下线192.168.y.yy的服务，修改ORDER服务的对应实例状态使用postman调用put请求]]></content>
       <categories>
-        <category>elasticsearch</category>
+        <category>springcloud</category>
       </categories>
       <tags>
-        <tag>elasticsearch插件</tag>
+        <tag>eureka</tag>
       </tags>
   </entry>
   <entry>
-    <title><![CDATA[Head插件安装]]></title>
-    <url>%2F2019%2F08%2F30%2Fes%2FHead(%E7%B1%BB%E4%BC%BC%E4%BA%8Emysql%E7%9A%84Navicat)%2F</url>
-    <content type="text"><![CDATA[1.安装环境Node.js 10.15.32.安装步骤：2.1.Node.js环境安装head插件要求Node.js环境，并且Node.js的版本 大于等于 6.0。首先，在官网下载Node.js。这里，我直接下载最新版 Node.js 10.15.3。下载地址：https://nodejs.org/en/download/。选择Linux Binaries (x64)，点击下载、解压。解压完成后，然后配置一下环境变量。下面给出我的配置：12export NODE_HOME=/home/tom/data/node-v10.15.3-linux-x64export PATH=$NODE_HOME/bin:$PATH配置好后，执行命令 source /etc/profile 使上面的配置生效。然后执行 npm -v，看到输出 6.4.1。则咱们的Node.js环境安装成功。2.2.head插件安装首先，在GitHub上找到head插件，地址：https://github.com/mobz/elasticsearch-head。将其下载/克隆到本地。下载完成后，进入 elasticsearch-head的目录下，按顺序执行命令：1234# 安装插件；由于需要下载一些数据，所以可能会比较慢。npm install# 启动插件；如果需要后台启动，可以使用 nohup，具体用法请自行百度npm run start按道理，执行上面的命令后，head 插件应该成功安装，并且正常启动。启动后，我们可以通过 localhost:9100 进行访问。但是，我在安装过程中，碰到了以下问题，下面记录下来，并和大家分享，希望能帮到大家。2.3.问题解决2.3.1.问题一1npm ERR! Error: EACCES: permission denied, access &apos;/home/tom/data/elasticsearch-head-master/node_modules&apos;显而易见，这是目录访问权限问题。我的解决办法是：切换到 root 用户，再执行 npm install 进行安装。2.3.2.问题二12Error extracting archivetar (child): bzip2：无法 exec: 没有那个文件或目录这个问题是因为系统中缺少 bzip2 包，直接执行下面命令安装即可：1yum install -y bzip22.3.3.问题三1npm ERR! phantomjs-prebuilt@2.1.16 install: `node install.js`这个我在github的一个issue下找到了答案，执行命令：1npm install phantomjs-prebuilt@2.1.16 --ignore-scripts这样，我们就安装好了 phantomjs-prebuilt@2.1.16，再执行 npm install 即可。到这里时，head插件安装的问题全部都解决了，启动head插件：12npm run startlocalhost:91002.3.4.问题四无法连接esES和head插件实际上属于两个不同的进程，这里存在一个跨域问题。要解决这个问题，需要首先关闭Elasticsearch，在elasticsearch.yml文件后添加两行配置：12http.cors.enabled: truehttp.cors.allow-origin: &quot;*&quot;然后，重新启动ES，刷新 head 插件页面，即可看到现在head插件已经正确查找到了我们的启动那个ES节点至此，我们的Elasticsearch-head插件就安装成功了。]]></content>
+    <title><![CDATA[搭建cerebro监控]]></title>
+    <url>%2F2019%2F08%2F30%2Fes%2FCentos7%20%E6%90%AD%E5%BB%BACerebro%20Elasticsearch%E7%9B%91%E6%8E%A7%2F</url>
+    <content type="text"><![CDATA[Cerebro Elasticsearch简介cerebro是一个开源(MIT许可)elasticsearch web管理工具，使用Scala、Play Framework、AngularJS和Bootstrap构建。cerebro的运行需要java1.8及以上版本。（对比head插件，比head页面美观，也方便使用）项目Github主页 ： https://github.com/lmenezes/cerebro安装12wget https://github.com/lmenezes/cerebro/releases/download/v0.8.1/cerebro-0.8.1.tgztar -zxvf cerebro-0.8.1.tgz配置：1234567891011121314151617181920es = &#123; gzip = true&#125;# Authenticationauth = &#123;type: basic settings: &#123; username = &quot;wind&quot; password = &quot;xxxxx&quot; &#125;&#125;# A list of known hostshosts = [ &#123; host = &quot;http://localhost:9200&quot; name = &quot;WIND-ES&quot; &#125;]启动 ：./bin/cerebro1&gt; 访问,9000端口:http://xxx.xxx:9000/12默认端口为9000，若需要修改端口tee -a /etc/systemd/system/cerebro.service &lt;&lt; ‘EOF’http = {port = “9000”address = “192.168.1.144”}EOF```port暴露的端口address默认为0.0.0.0，设置为0.0.0.0表示对该主机所有网卡开放]]></content>
       <categories>
         <category>elasticsearch</category>
       </categories>
@@ -31,6 +31,17 @@
       </categories>
       <tags>
         <tag>elasticsearch</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[Head插件安装]]></title>
+    <url>%2F2019%2F08%2F30%2Fes%2FHead(%E7%B1%BB%E4%BC%BC%E4%BA%8Emysql%E7%9A%84Navicat)%2F</url>
+    <content type="text"><![CDATA[1.安装环境Node.js 10.15.32.安装步骤：2.1.Node.js环境安装head插件要求Node.js环境，并且Node.js的版本 大于等于 6.0。首先，在官网下载Node.js。这里，我直接下载最新版 Node.js 10.15.3。下载地址：https://nodejs.org/en/download/。选择Linux Binaries (x64)，点击下载、解压。解压完成后，然后配置一下环境变量。下面给出我的配置：12export NODE_HOME=/home/tom/data/node-v10.15.3-linux-x64export PATH=$NODE_HOME/bin:$PATH配置好后，执行命令 source /etc/profile 使上面的配置生效。然后执行 npm -v，看到输出 6.4.1。则咱们的Node.js环境安装成功。2.2.head插件安装首先，在GitHub上找到head插件，地址：https://github.com/mobz/elasticsearch-head。将其下载/克隆到本地。下载完成后，进入 elasticsearch-head的目录下，按顺序执行命令：1234# 安装插件；由于需要下载一些数据，所以可能会比较慢。npm install# 启动插件；如果需要后台启动，可以使用 nohup，具体用法请自行百度npm run start按道理，执行上面的命令后，head 插件应该成功安装，并且正常启动。启动后，我们可以通过 localhost:9100 进行访问。但是，我在安装过程中，碰到了以下问题，下面记录下来，并和大家分享，希望能帮到大家。2.3.问题解决2.3.1.问题一1npm ERR! Error: EACCES: permission denied, access &apos;/home/tom/data/elasticsearch-head-master/node_modules&apos;显而易见，这是目录访问权限问题。我的解决办法是：切换到 root 用户，再执行 npm install 进行安装。2.3.2.问题二12Error extracting archivetar (child): bzip2：无法 exec: 没有那个文件或目录这个问题是因为系统中缺少 bzip2 包，直接执行下面命令安装即可：1yum install -y bzip22.3.3.问题三1npm ERR! phantomjs-prebuilt@2.1.16 install: `node install.js`这个我在github的一个issue下找到了答案，执行命令：1npm install phantomjs-prebuilt@2.1.16 --ignore-scripts这样，我们就安装好了 phantomjs-prebuilt@2.1.16，再执行 npm install 即可。到这里时，head插件安装的问题全部都解决了，启动head插件：12npm run startlocalhost:91002.3.4.问题四无法连接esES和head插件实际上属于两个不同的进程，这里存在一个跨域问题。要解决这个问题，需要首先关闭Elasticsearch，在elasticsearch.yml文件后添加两行配置：12http.cors.enabled: truehttp.cors.allow-origin: &quot;*&quot;然后，重新启动ES，刷新 head 插件页面，即可看到现在head插件已经正确查找到了我们的启动那个ES节点至此，我们的Elasticsearch-head插件就安装成功了。]]></content>
+      <categories>
+        <category>elasticsearch</category>
+      </categories>
+      <tags>
+        <tag>elasticsearch插件</tag>
       </tags>
   </entry>
   <entry>
