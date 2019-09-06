@@ -1,6 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title><![CDATA[git配置之github&gitlab]]></title>
+    <url>%2F2019%2F09%2F06%2Fgit%2Fgit%E9%85%8D%E7%BD%AE%E4%B9%8Bgithub%26gitlab%2F</url>
+    <content type="text"><![CDATA[记录下github账号与gitlab同一电脑下不同SSH Key的git配置过程:1. github账号SSH Key配置(1) 设置git的名字和邮箱，这点很重要，尤其是对于gitlab的配置12git config --global user.name &quot;xxx&quot;git config --global user.email &quot;xxx&quot;(2) 初始化gitgit init(3) 生成SSH Keyssh-keygen -t rsa -C &quot;your github email&quot;可以看到结果如下，选择默认，passphrase可以根据自己的需要设置，这里直接回车就好。输入cat id_rsa.pub获取公钥或者进入目录复制，贴出本机目录地址1C:\Users\WIND-MILLS\.ssh(4)将公钥（id_rsa.pub）加入到github中，选择setting-&gt;SSH KEY添加即可。2. 配置gitlab SSH Key方法和上面类似，只是生成的Key需要这样输入：1ssh-keygen -t rsa -C &quot;your email&quot; -b 4096这里取名为yst.pub。密码直接回车（三步后两步）3. 配置两种不同的SSH key首先需要将密钥添加到SSH agent中，因为默认只读取id_rsa，为了让SSH识别新的私钥，需将其添加到SSH agent中：1ssh-add ~/.ssh/yst如果出现Could not open a connection to your authentication agent的错误，就试着用以下命令：12ssh-agent bashssh-add ~/.ssh/yst将git bash的工作目录切换到.ssh的默认目录:输入touch config, 创建config文件，添加：123456789Host github HostName github.com PreferredAuthentications publickey IdentityFile ~/.ssh/id_rsa Host gitlab HostName gitlab.xxx.x PreferredAuthentications publickey IdentityFile ~/.ssh/yst4. 验证在github&amp;gitlab上的settings里面配置完之后(1) 针对github，输入指令：1ssh -T git@github.com(2) 针对gitlab, 输入指令：1ssh -T git@gitlab]]></content>
+      <categories>
+        <category>git</category>
+      </categories>
+      <tags>
+        <tag>git</tag>
+      </tags>
+  </entry>
+  <entry>
     <title><![CDATA[“OUT_OF_SERVICE”了解EUREKA的下线/上线]]></title>
     <url>%2F2019%2F09%2F05%2Fspringcloud%2FEUREKA%20%E4%B8%8B%E7%BA%BF%E4%B8%8A%E7%BA%BF%2F</url>
     <content type="text"><![CDATA[EUREKA 下线上线启动项目发现服务请求不到，打开eureka注册中心发线实例被标注了OUT_OF_SERVICE开发环境中，eureka注册中心某服务被注册了多个实例，feign 调用时 服务请求到其他实例上，请求收不到，使用一下命令删除或者强制下线实例：1.DELETE 删除注册实例，但是如果被删除的实例继续注册，还是会存在命令：1http://192.168.x.xx:8761/eureka/apps/xxx/192.168.y.yy192.168.x.xx:8761 为 eurek的地址，xxx 为服务的名称，192.168.y.yy 为需要删除注册的实例别名例如该服务，想要删除 192.168.y.yy 命令为1http://192.168.x.xx:8761/eureka/apps/xxx/192.168.y.yy使用POSTMAN调用delete请求即可1DELETE http://192.168.x.xx:8761/eureka/apps/xxx/192.168.y.yy2.强制下线实例 out_of_service命令：1http://192.168.x.xx:8761/eureka/apps/ORDER/192.168.y.yy/status?value=OUT_OF_SERVICE下线192.168.y.yy的服务，修改ORDER服务的对应实例状态使用postman调用put请求]]></content>
@@ -9,17 +20,6 @@
       </categories>
       <tags>
         <tag>eureka</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title><![CDATA[搭建cerebro监控]]></title>
-    <url>%2F2019%2F08%2F30%2Fes%2FCentos7%20%E6%90%AD%E5%BB%BACerebro%20Elasticsearch%E7%9B%91%E6%8E%A7%2F</url>
-    <content type="text"><![CDATA[Cerebro Elasticsearch简介cerebro是一个开源(MIT许可)elasticsearch web管理工具，使用Scala、Play Framework、AngularJS和Bootstrap构建。cerebro的运行需要java1.8及以上版本。（对比head插件，比head页面美观，也方便使用）项目Github主页 ： https://github.com/lmenezes/cerebro安装12wget https://github.com/lmenezes/cerebro/releases/download/v0.8.1/cerebro-0.8.1.tgztar -zxvf cerebro-0.8.1.tgz配置：1234567891011121314151617181920es = &#123; gzip = true&#125;# Authenticationauth = &#123;type: basic settings: &#123; username = &quot;wind&quot; password = &quot;xxxxx&quot; &#125;&#125;# A list of known hostshosts = [ &#123; host = &quot;http://localhost:9200&quot; name = &quot;WIND-ES&quot; &#125;]启动 ：./bin/cerebro1&gt; 访问,9000端口:http://xxx.xxx:9000/12默认端口为9000，若需要修改端口tee -a /etc/systemd/system/cerebro.service &lt;&lt; ‘EOF’http = {port = “9000”address = “192.168.1.144”}EOF```port暴露的端口address默认为0.0.0.0，设置为0.0.0.0表示对该主机所有网卡开放]]></content>
-      <categories>
-        <category>elasticsearch</category>
-      </categories>
-      <tags>
-        <tag>elasticsearch插件</tag>
       </tags>
   </entry>
   <entry>
@@ -56,14 +56,14 @@
       </tags>
   </entry>
   <entry>
-    <title><![CDATA[elasticsearch安装]]></title>
-    <url>%2F2019%2F08%2F30%2Fes%2Felasticsearch%E5%AE%89%E8%A3%85%E9%85%8D%E7%BD%AE%2F</url>
-    <content type="text"><![CDATA[1.安装步骤1.1从官网下载linux版本的elasticsearch安装程序，https://www.elastic.co/cn/downloads/elasticsearch （最好直接通过迅雷工具下载，普通下载太慢了）目前的版本是7.x的：elasticsearch-7.0.1-linux-x86_64.tar.gz1.2centos服务器安装ftp软件（winSCP等），通过ftp软件把elasticsearch-7.0.1-linux-x86_64.tar.gz上传到服务器的opt/mysoft目录下。1.3tar -zxvf elasticsearch-7.0.1-linux-x86_64.tar.gz解压到当前目录下，mv elasticsearch-7.0.1/ elasticsearch重命名为elasticsearch1.4通过命令：sh /opt/mysoft/elasticsearch/bin/elasticsearch启动ElasticSearch。启动后会因为权限可能抛出异常：123456解决方法： 1.添加用户：useradd elastic 2.给用户授权：chown -R elastic:elastic /opt/mysoft/elasticserch/ 3.切换用户：su elastic 4.通过命令重写启动服务：sh /opt/mysoft/elasticsearch/bin/elasticsearch -d 5.输入：curl http://localhost:92001.5vi /opt/mysoft/elasticserch/config/elasticsearch.yml修改network配置本机的ip地址和端口号：network.host: 192.168.248.100http.port: 9200修改之后可能会出现问题：p11WARN [o.e.b.JNANatives ] unable to install syscall filter使用新的linux版本就没问题了p2123ERROR: bootstrap checks failedmax file descriptors [4096] for elasticsearch process likely too low, increase to at least [65536]max number of threads [1024] for user [lishang] likely too low, increase to at least [2048]解决：切换到root用户，编辑limits.conf 添加类似如下内容vi /etc/security/limits.conf添加如下内容:1234* soft nofile 65536* hard nofile 131072* soft nproc 2048* hard nproc 4096p31max number of threads [1024] for user [lish] likely too low, increase to at least解决：切换到root用户，进入limits.d目录下修改配置文件。vi /etc/security/limits.d/90-nproc.conf修改如下内容：123* soft nproc 1024#修改为* soft nproc 2048p41max virtual memory areas vm.max_map_count [65530] likely too low, increase to at least [262144]解决：切换到root用户修改配置sysctl.confvi /etc/sysctl.conf添加下面配置:vm.max_map_count=655360并执行命令：sysctl -pp51max file descriptors [4096] for elasticsearch process likely too low, increase to at least [65536]解决：修改切换到root用户修改配置limits.conf 添加下面两行命令:vi /etc/security/limits.conf12* hard nofile 65536* soft nofile 65536p6启动Elasticsearch时使用新建的elk用户，启动时报错：1max number of threads [3895] for user [elk] is too low, increase to at least [4096]解决方法：root用户修改：vi/etc/security/limits.d/90-nproc.conf123* soft nproc 2048修改为：* soft nproc 4096p712ERROR: [1] bootstrap checks failedsystem call filters failed to install; check the logs and fix your configuration or disable system call filters at your own risk。解决：Centos6不支持SecComp，而ES5.2.0默认bootstrap.system_call_filter为true禁用：在elasticsearch.yml中配置 bootstrap.system_call_filter为false，注意要在Memory下面添加:12bootstrap.memory_lock: false bootstrap.system_call_filter: false再次启动ElasticSearch就能够正常启动了。p81the default discovery settings are unsuitable for production use; at least one of [discovery.seed_hosts, discovery.seed_providers, cluster.initial_master_nodes] must be configured注意：在外部访问ElasticSearch服务的时候，要停掉CentOS的防火墙，不然仍旧无法访问。防火墙查看命令：service iptables status防火墙停止命令：service iptables stopElasticSeach后台启动命令：sh/opt/mysoft/elasticsearch/bin/elasticsearch -d]]></content>
+    <title><![CDATA[搭建cerebro监控]]></title>
+    <url>%2F2019%2F08%2F30%2Fes%2FCentos7%20%E6%90%AD%E5%BB%BACerebro%20Elasticsearch%E7%9B%91%E6%8E%A7%2F</url>
+    <content type="text"><![CDATA[Cerebro Elasticsearch简介cerebro是一个开源(MIT许可)elasticsearch web管理工具，使用Scala、Play Framework、AngularJS和Bootstrap构建。cerebro的运行需要java1.8及以上版本。（对比head插件，比head页面美观，也方便使用）项目Github主页 ： https://github.com/lmenezes/cerebro安装12wget https://github.com/lmenezes/cerebro/releases/download/v0.8.1/cerebro-0.8.1.tgztar -zxvf cerebro-0.8.1.tgz配置：1234567891011121314151617181920es = &#123; gzip = true&#125;# Authenticationauth = &#123;type: basic settings: &#123; username = &quot;wind&quot; password = &quot;xxxxx&quot; &#125;&#125;# A list of known hostshosts = [ &#123; host = &quot;http://localhost:9200&quot; name = &quot;WIND-ES&quot; &#125;]启动 ：./bin/cerebro1&gt; 访问,9000端口:http://xxx.xxx:9000/12默认端口为9000，若需要修改端口tee -a /etc/systemd/system/cerebro.service &lt;&lt; ‘EOF’http = {port = “9000”address = “192.168.1.144”}EOF```port暴露的端口address默认为0.0.0.0，设置为0.0.0.0表示对该主机所有网卡开放]]></content>
       <categories>
         <category>elasticsearch</category>
       </categories>
       <tags>
-        <tag>elasticsearch</tag>
+        <tag>elasticsearch插件</tag>
       </tags>
   </entry>
   <entry>
@@ -110,6 +110,17 @@
       <tags>
         <tag>elasticsearch</tag>
         <tag>搜索引擎</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[elasticsearch安装]]></title>
+    <url>%2F2019%2F08%2F30%2Fes%2Felasticsearch%E5%AE%89%E8%A3%85%E9%85%8D%E7%BD%AE%2F</url>
+    <content type="text"><![CDATA[1.安装步骤1.1从官网下载linux版本的elasticsearch安装程序，https://www.elastic.co/cn/downloads/elasticsearch （最好直接通过迅雷工具下载，普通下载太慢了）目前的版本是7.x的：elasticsearch-7.0.1-linux-x86_64.tar.gz1.2centos服务器安装ftp软件（winSCP等），通过ftp软件把elasticsearch-7.0.1-linux-x86_64.tar.gz上传到服务器的opt/mysoft目录下。1.3tar -zxvf elasticsearch-7.0.1-linux-x86_64.tar.gz解压到当前目录下，mv elasticsearch-7.0.1/ elasticsearch重命名为elasticsearch1.4通过命令：sh /opt/mysoft/elasticsearch/bin/elasticsearch启动ElasticSearch。启动后会因为权限可能抛出异常：123456解决方法： 1.添加用户：useradd elastic 2.给用户授权：chown -R elastic:elastic /opt/mysoft/elasticserch/ 3.切换用户：su elastic 4.通过命令重写启动服务：sh /opt/mysoft/elasticsearch/bin/elasticsearch -d 5.输入：curl http://localhost:92001.5vi /opt/mysoft/elasticserch/config/elasticsearch.yml修改network配置本机的ip地址和端口号：network.host: 192.168.248.100http.port: 9200修改之后可能会出现问题：p11WARN [o.e.b.JNANatives ] unable to install syscall filter使用新的linux版本就没问题了p2123ERROR: bootstrap checks failedmax file descriptors [4096] for elasticsearch process likely too low, increase to at least [65536]max number of threads [1024] for user [lishang] likely too low, increase to at least [2048]解决：切换到root用户，编辑limits.conf 添加类似如下内容vi /etc/security/limits.conf添加如下内容:1234* soft nofile 65536* hard nofile 131072* soft nproc 2048* hard nproc 4096p31max number of threads [1024] for user [lish] likely too low, increase to at least解决：切换到root用户，进入limits.d目录下修改配置文件。vi /etc/security/limits.d/90-nproc.conf修改如下内容：123* soft nproc 1024#修改为* soft nproc 2048p41max virtual memory areas vm.max_map_count [65530] likely too low, increase to at least [262144]解决：切换到root用户修改配置sysctl.confvi /etc/sysctl.conf添加下面配置:vm.max_map_count=655360并执行命令：sysctl -pp51max file descriptors [4096] for elasticsearch process likely too low, increase to at least [65536]解决：修改切换到root用户修改配置limits.conf 添加下面两行命令:vi /etc/security/limits.conf12* hard nofile 65536* soft nofile 65536p6启动Elasticsearch时使用新建的elk用户，启动时报错：1max number of threads [3895] for user [elk] is too low, increase to at least [4096]解决方法：root用户修改：vi/etc/security/limits.d/90-nproc.conf123* soft nproc 2048修改为：* soft nproc 4096p712ERROR: [1] bootstrap checks failedsystem call filters failed to install; check the logs and fix your configuration or disable system call filters at your own risk。解决：Centos6不支持SecComp，而ES5.2.0默认bootstrap.system_call_filter为true禁用：在elasticsearch.yml中配置 bootstrap.system_call_filter为false，注意要在Memory下面添加:12bootstrap.memory_lock: false bootstrap.system_call_filter: false再次启动ElasticSearch就能够正常启动了。p81the default discovery settings are unsuitable for production use; at least one of [discovery.seed_hosts, discovery.seed_providers, cluster.initial_master_nodes] must be configured注意：在外部访问ElasticSearch服务的时候，要停掉CentOS的防火墙，不然仍旧无法访问。防火墙查看命令：service iptables status防火墙停止命令：service iptables stopElasticSeach后台启动命令：sh/opt/mysoft/elasticsearch/bin/elasticsearch -d]]></content>
+      <categories>
+        <category>elasticsearch</category>
+      </categories>
+      <tags>
+        <tag>elasticsearch</tag>
       </tags>
   </entry>
 </search>
